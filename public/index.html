@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini ChatBot</title>
+    <link rel="stylesheet" href="/tailwind-output.css">
+    <style>
+        .gradient {
+            background: linear-gradient(93.23deg, #F778BA 2.35%, #79C0FF 76.99%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+        }
+    </style>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+</head>
+<body class="text-center flex flex-col items-center">
+
+    <h1 class="gradient text-4xl font-bold m-5">Gemini freak!</h1>
+    <div class="flex items-center w-full max-w-md">
+        <input type="text" class="h-12 w-full m-5 p-4 bg-slate-100 rounded-full focus:outline-2" placeholder="Enter your prompt" id="message_input" onkeydown="handleEnter(event)" />
+        <span class="w-10 h-10 p-2 bg-black rounded-full flex items-center justify-center cursor-pointer" onclick="send_request()">
+            <span class="material-symbols-outlined text-white">send</span>
+        </span>
+    </div>
+    <div id="response-container" class="w-full max-w-md flex flex-col space-y-2 mt-4 overflow-y-auto"></div>
+
+    <script src="https://cdn.socket.io/4.8.0/socket.io.min.js"></script>
+    <script>
+        const socket = io();
+
+        socket.on("newMessage", (msg) => {
+            display_message(msg, "received");
+        });
+
+        socket.on("new", (notification) => {
+            display_message(notification, "notification");
+        });
+
+        function handleEnter(event) {
+            if (event.key === "Enter") {
+                send_request();
+            }
+        }
+
+        async function send_request() {
+            const messageInput = document.getElementById('message_input');
+            const message = messageInput.value;
+
+            if (message.trim() !== "") {
+                display_message(message, "sent");
+
+                socket.emit('message', message);
+                messageInput.value = '';
+            }
+        }
+
+        function display_message(content, type) {
+            const container = document.getElementById('response-container');
+            const messageWrapper = document.createElement('div');
+            const messageDiv = document.createElement('div');
+
+            messageWrapper.className = type === "sent" ? 'flex justify-end' : 'flex justify-start';
+            messageDiv.className = 'w-4/5 rounded-md p-3 m-2';
+
+            if (type === "received") {
+                messageDiv.classList.add('bg-blue-100');
+            } else {
+                messageDiv.classList.add('bg-slate-100');
+            }
+
+            messageDiv.innerHTML = `<p>${content}</p>`;
+            messageWrapper.appendChild(messageDiv);
+            container.appendChild(messageWrapper);
+
+            container.scrollTop = container.scrollHeight;
+        }
+    </script>
+</body>
+</html>
