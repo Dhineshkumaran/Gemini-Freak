@@ -7,6 +7,7 @@ import messageRoute from './routes/messageRoute';
 const app = express();
 const filepath = path.resolve('dist', 'styles');
 app.use(express.static(filepath));
+app.use(express.static(path.resolve('public')));
 
 const server = createServer(app);
 const io = new Server(server);
